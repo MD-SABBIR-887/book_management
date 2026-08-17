@@ -1,6 +1,3 @@
-
-from warnings import filters
-
 from django.db.migrations import serializer
 from django.shortcuts import render
 from book_model.models import BookList, Review
@@ -13,19 +10,20 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.pagination import PageNumberPagination
-import django_filters.rest_framework
 from rest_framework import viewsets
 from .serializers import BookListSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = BookList.objects.all().order_by("id")
     serializer_class = BookListSerializer
     permission_classes = [IsAuthenticated]
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ["category", "author"]
     search_fields = ["category", "author"]
-    ordering_fields = ["category", "author"]
+    ordering_fields = ["id", "price"]
     ordering = ["id"]
     def get(self, request):
         books = BookList.objects.all().order_by("id")
@@ -52,10 +50,10 @@ class BookDetailsView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BookListSerializer
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category', 'author']
-    search_fields = ["id", "author"]
-    ordering_fields = ["id", "price", "published_date"]
+    search_fields = ["category", "author"]
+    ordering_fields = ["id", "price"]
     ordering = ["id"]
     
     def get(self, request, pk):
